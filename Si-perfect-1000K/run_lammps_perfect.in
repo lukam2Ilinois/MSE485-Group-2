@@ -1,0 +1,40 @@
+# Perfect diamond Si supercell (no vacancy)
+# Generates a 512-atom data file perfect_512.dat
+
+units           metal
+atom_style      atomic
+boundary        p p p
+
+# ----- Build perfect 4x4x4 diamond lattice -----
+# Box size from your simulation: 21.77481 Å in each direction
+# So lattice constant a = 21.77481 / 4
+variable        a equal 21.77481/4.0
+
+lattice         diamond ${a}
+region          box block 0 4 0 4 0 4
+create_box      1 box
+create_atoms    1 box
+
+mass            1 28.0855            # Si mass
+
+# ----- Potential (same as your current runs) -----
+pair_style      sw
+pair_coeff      * * Si.sw Si
+
+neighbor        2.0 bin
+neigh_modify    delay 0 every 1 check yes
+
+# (Optional) assign velocities if you *do* want to run dynamics later
+velocity        all create 1000.0 12345 mom yes rot no dist gaussian
+
+timestep        0.001                 # 1 fs
+
+thermo          100
+thermo_style    custom step temp pe ke etotal
+
+# We don't actually need to run MD; we just want the perfect structure.
+run             0
+
+# Write out the perfect 512-atom structure
+write_data      perfect_512.dat
+
