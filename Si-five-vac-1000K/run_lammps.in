@@ -1,0 +1,41 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# LAMMPS input generated from LammpsInputFile with pymatgen v2025.10.7
+
+# STYLES
+units metal
+atom_style atomic
+
+# SET UP CALCULATION
+read_data starting_config.dat
+
+# ---------- create 4 additional vacancies (total 5) ----------
+# choose any 4 distinct atom IDs between 1 and 511
+group         extra_vacs id 50 150 250 350
+delete_atoms  group extra_vacs
+# LAMMPS will print "Deleted 4 atoms" and new total = 507
+# -----------------------------------------------------------
+pair_style sw
+pair_coeff * * Si.sw Si
+velocity all create 1000 2201697
+
+# CALCULATION PARAMETERS
+fix f1 all nvt temp 1000.0 1000.0 $(100.0*dt)
+thermo 10000
+
+# RUN CALC AND WRITE OUTPUTS
+dump d1 all custom 100 state_dump id type x y z vx vy vz
+run 10000000
+write_data FINAL_STRUCTURE
