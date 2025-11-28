@@ -1,0 +1,39 @@
+# Create a 1-interstitial Si configuration from the perfect 512-atom cell
+
+units           metal
+atom_style      atomic
+boundary        p p p
+
+# ----- Read the perfect no-vacancy structure -----
+read_data       perfect_512.dat
+
+# Just in case (mass should already be set in the data file)
+mass            1 28.0855
+
+# ----- Potential (same as before) -----
+pair_style      sw
+pair_coeff      * * Si.sw Si
+
+neighbor        2.0 bin
+neigh_modify    delay 0 every 1 check yes
+
+# ----- Define a point for the interstitial -----
+# We choose the *box center* as an interstitial position:
+# x = lx/2, y = ly/2, z = lz/2 (lx, ly, lz are box lengths)
+variable        xc equal 0.5*lx
+variable        yc equal 0.5*ly
+variable        zc equal 0.5*lz
+
+# Add one extra Si atom at the interstitial site
+create_atoms    1 single ${xc} ${yc} ${zc} units box
+
+# Check how many atoms we have now
+thermo          0
+thermo_style    custom step atoms
+
+# We don’t need to run dynamics here, just write the new structure
+run             0
+
+# Write out the 1-interstitial starting config
+write_data      starting_config_1int.dat
+
