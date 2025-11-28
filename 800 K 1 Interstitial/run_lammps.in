@@ -1,0 +1,21 @@
+# LAMMPS input generated from LammpsInputFile with pymatgen v2025.10.7
+
+# STYLES
+units metal
+atom_style atomic
+
+# SET UP CALCULATION
+read_data starting_config.dat
+pair_style sw
+pair_coeff * * Si.sw Si
+velocity all create 800 5102369
+
+# CALCULATION PARAMETERS
+fix f1 all nvt temp 800.0 800.0 $(100.0*dt)
+thermo 100000
+thermo_style custom step temp press spcpu cpuremain
+
+# RUN CALC AND WRITE OUTPUTS
+dump d1 all custom 100 state_dump id type x y z vx vy vz
+run 10000000
+write_data FINAL_STRUCTURE
