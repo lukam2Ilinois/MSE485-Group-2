@@ -1,0 +1,49 @@
+# -------- 5 interstitials in Si at 1000 K: equil + 10 ns MD --------
+
+units           metal
+atom_style      atomic
+boundary        p p p
+
+# ----- read relaxed 5-int structure from the relax step -----
+read_data       starting_config_5int.dat
+
+# mass          1 28.0855    # uncomment if needed
+
+# ----- SW potential -----
+pair_style      sw
+pair_coeff      * * Si.sw Si
+
+neighbor        2.0 bin
+neigh_modify    delay 0 every 1 check yes
+
+timestep        0.001        # ps (1 fs)
+
+thermo_style    custom step temp pe ke etotal
+thermo          10000
+
+# ---------------- NVT equilibration ----------------
+# (same idea as we used for 1 interstitial: bring to 1000 K)
+
+velocity        all create 1000.0 4928459 mom yes rot yes dist gaussian
+fix             eq all nvt temp 1000.0 1000.0 0.1
+
+# e.g. 200 ps equilibration: 200 ps / 0.001 ps = 200000 steps
+run             200000
+unfix           eq
+
+# ---------------- NVT production run (10 ns) ----------------
+
+reset_timestep  0
+fix             prod all nvt temp 1000.0 1000.0 0.1
+
+# dump every 1000 steps = 1 ps (compatible with your MSD code)
+dump            1 all custom 1000 state_dump_5int id type x y z vx vy vz
+dump_modify     1 sort id
+
+thermo          10000
+
+# 10 ns = 10,000 ps → 10,000 / 0.001 = 10,000,000 steps
+run             10000000
+
+write_data      FINAL_STRUCTURE_5int
+

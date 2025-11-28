@@ -1,0 +1,41 @@
+# ---------------- 5 interstitials: build + relax ----------------
+
+units           metal
+atom_style      atomic
+boundary        p p p
+
+# ----- read perfect 512-atom Si crystal -----
+read_data       perfect_512.dat
+
+# if masses are not defined in the data file, uncomment:
+# mass          1 28.0855
+
+# ----- SW potential -----
+pair_style      sw
+pair_coeff      * * Si.sw Si
+
+neighbor        2.0 bin
+neigh_modify    delay 0 every 1 check yes
+
+thermo_style    custom step pe
+thermo          100
+
+# ----- insert 5 extra Si atoms (interstitials) -----
+region          boxreg block INF INF INF INF INF INF
+create_atoms    1 random 5 54321 boxreg overlap 1.0
+#                 ^       ^
+#           atom type   random seed
+# overlap 1.0 Å avoids putting an atom on top of an existing one
+
+# Now you should have 512 + 5 = 517 atoms.
+
+# ----- minimize to relax overlaps and strains -----
+reset_timestep  0
+fix             relax all box/relax aniso 0.0 vmax 0.001
+min_style       cg
+minimize        1.0e-6 1.0e-8 1000 10000
+unfix           relax
+
+# ----- write relaxed starting config for MD -----
+write_data      starting_config_5int.dat
+
