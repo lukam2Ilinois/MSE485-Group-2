@@ -8,7 +8,7 @@ atom_style atomic
 read_data starting_config.dat
 pair_style sw
 pair_coeff * * Si.sw Si
-velocity all create 700 7134727
+velocity all create 700 5370138
 
 # CALCULATION PARAMETERS
 fix f1 all nvt temp 700.0 700.0 $(100.0*dt)
