@@ -1,0 +1,35 @@
+
+# C contaminant run: T1200K_C1 (T=1200.0 K, N_C=1)
+
+units           metal
+atom_style      atomic
+boundary        p p p
+
+read_data       starting_config_T1200K_C1.dat
+
+mass            1 28.0855
+mass            2 12.011
+
+pair_style      sw
+# NOTE: currently treating C with same SW params as Si.
+# For a true Si–C potential, replace the file and species labels here.
+pair_coeff      * * Si.sw Si Si
+
+neighbor        2.0 bin
+neigh_modify    delay 0 every 1 check yes
+
+timestep        0.001    # 1 fs
+
+velocity        all create 1200.0 12345 mom yes rot yes dist gaussian
+
+fix             f1 all nvt temp 1200.0 1200.0 $(100.0*dt)
+
+thermo_style    custom step temp pe ke etotal
+thermo          10000
+
+dump            d1 all custom 100 state_dump_T1200K_C1 id type x y z vx vy vz
+dump_modify     d1 sort id
+
+run             10000000   # 10 ns
+
+write_data      FINAL_STRUCTURE_T1200K_C1
